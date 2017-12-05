@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.daoxue.zhidao.ocr.mapper.PaperInfoMapper">
+
+	<select id="findPaperList" resultType="com.daoxue.zhidao.ocr.model.PaperInfo">
+		select `id`,
+		`one_side` as oneSide,
+		`other_side` as otherSide,
+		`number`,
+		`ocr_result` as ocrResult,
+		`status`
+		from`paper_info_t`
+		where 1 = 1
+		<if test="status != null">
+			and status = #{status}
+		</if>
+
+		<if test="number != null">
+			and number = #{number}
+		</if>
+		
+	</select>
+
+
+	<insert id="insertPaper" parameterType="com.daoxue.zhidao.ocr.model.PaperInfo">
+		INSERT INTO `paper_info_t` ( `one_side`, `other_side`,`number`,
+		`create_time`) VALUES (#{oneSide}, #{otherSide}, #{number}, sysdate())
+	</insert>
+
+	<update id="updatePaper" parameterType="com.daoxue.zhidao.ocr.model.PaperInfo">
+		UPDATE `paper_info_t` SET
+		`id`= `id`
+		<if test="status != null">
+			, `status`=#{status}
+		</if>
+		<if test="ocrResult != null">
+			, `ocr_result`=#{ocrResult}
+		</if>
+		WHERE `id`= #{id}
+	</update>
+	
+<!-- 	<select id="findGroupPapers" resultType="com.daoxue.zhidao.ocr.model.PaperInfo"> -->
+<!-- 		select `id`, -->
+<!-- 		 MAX(`create_time`) as createTime, -->
+<!-- 		 `status`, -->
+<!-- 		`number` -->
+<!-- 		from`paper_info_t` -->
+<!-- 		where 1 = 1 -->
+<!-- 		<if test="status != null"> -->
+<!-- 			and status = #{status} -->
+<!-- 		</if> -->
+<!-- 		 GROUP BY `number`  -->
+<!-- 	</select> -->
+	
+	<insert id="insertPaperBatch" useGeneratedKeys="true" keyProperty="id" parameterType="com.daoxue.zhidao.ocr.model.PaperInfo">
+			INSERT INTO `paper_batch_t` ( `paper_number`, `create_time`) VALUES ( #{number}, sysdate());
+	</insert>
+	
+	<update id="batchUpdate" >
+		UPDATE `paper_info_t` SET
+			`status`=#{status}
+		WHERE `id` in
+		
+		<foreach collection="list" index="index" item="item" 
+       	 separator="," open="(" close=")">
+        	#{item}
+    	</foreach>
+	
+	</update>
+	
+	<update id="updatePaperBatch" parameterType="com.daoxue.zhidao.ocr.model.PaperInfo">
+		UPDATE `paper_batch_t` SET
+			`status`=#{status},
+		 `last_update_time` = sysdate()
+		WHERE 1 = 1
+<!-- 		<if test="id != null"> -->
+<!-- 			and id = #{id} -->
+<!-- 		</if> -->
+		<if test="number != null and number != ''">
+			and paper_number = #{number}
+		</if>
+	</update>
+	
+	<select id="findPaperBatches" resultType="com.daoxue.zhidao.ocr.model.PaperInfo">
+		select `id`,
+		`paper_number` as number,
+		`status`
+		from`paper_batch_t`
+		where 1 = 1
+		<if test="status != null">
+			and status = #{status}
+		</if>
+
+		<if test="id != null">
+			and id = #{id}
+		</if>
+		
+	</select>
+	
+</mapper>

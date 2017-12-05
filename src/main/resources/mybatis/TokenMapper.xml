@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.daoxue.zhidao.ocr.mapper.TokenMapper">
+
+	<select id="findToken" resultType="com.daoxue.zhidao.ocr.model.Token">
+		select `id` as signStr,
+		`random_str` as randomStr,
+		`create_time` as createTime,
+		`token`
+		from `token_auth_t`
+		where status != 0
+		<if test="signStr != null and signStr != ''">
+			and id = #{signStr}
+		</if>
+
+		<if test="token != null and token != ''">
+			and token = #{token}
+		</if>
+		
+	</select>
+
+	<insert id="insertToken" parameterType="com.daoxue.zhidao.ocr.model.Token">
+		INSERT INTO `token_auth_t` (`id`, `random_str`, `create_time`) 
+		VALUES (#{signStr}, #{randomStr}, sysdate());
+	</insert>
+
+	<update id="updateToken" parameterType="com.daoxue.zhidao.ocr.model.Token">
+		UPDATE `token_auth_t` SET
+		last_update_time = sysdate()
+		<if test="token != null and token != ''">
+			, token = #{token}
+		</if>
+		<if test="status != null">
+			, status = #{status}
+		</if>
+		
+		WHERE `id`= #{signStr}
+	</update>
+	
+</mapper>
